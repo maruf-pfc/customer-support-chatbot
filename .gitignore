@@ -1,0 +1,74 @@
+# ==============================
+# OS / Editor
+# ==============================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# ==============================
+# Environment variables
+# ==============================
+.env
+.env.*
+!.env.example
+
+# ==============================
+# Python
+# ==============================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# ==============================
+# FastAPI / Backend
+# ==============================
+server/venv/
+server/__pycache__/
+server/vectorstore/
+server/data/
+
+# Logs
+*.log
+
+# ==============================
+# Node / Next.js
+# ==============================
+node_modules/
+.next/
+out/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ==============================
+# Frontend build env
+# ==============================
+frontend/.env.local
+frontend/.env.production
+frontend/.env.development
+
+# ==============================
+# Ollama / Local Models
+# ==============================
+.ollama/
+ollama/
+
+# ==============================
+# Misc
+# ==============================
+*.sqlite
+*.db
