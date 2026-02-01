@@ -7,7 +7,7 @@ from app.config import DATA_DIR, VECTORSTORE_DIR, EMBEDDING_MODEL_NAME
 import os
 
 
-def ingestDocuments():
+def ingest_documents():
     documents = []
 
     for file in os.listdir(DATA_DIR):
@@ -38,4 +38,4 @@ def ingestDocuments():
 
 
 if __name__ == "__main__":
-    ingestDocuments()
+    ingest_documents()
