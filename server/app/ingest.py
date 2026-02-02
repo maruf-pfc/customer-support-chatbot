@@ -7,7 +7,6 @@ from app.config import DATA_DIR, VECTORSTORE_DIR, EMBEDDING_MODEL_NAME
 
 
 def ingest_documents():
-    # 1. Validate data directory
     if not DATA_DIR.exists():
         raise RuntimeError(f"DATA_DIR does not exist: {DATA_DIR}")
 
@@ -15,28 +14,24 @@ def ingest_documents():
     if not pdf_files:
         raise RuntimeError("No PDF files found in data/docs")
 
-    # 2. Load PDFs
     documents = []
     for pdf in pdf_files:
         loader = PyPDFLoader(str(pdf))
-        documents.extend(loader.load())
+        docs = loader.load()
+        for doc in docs:
+            doc.metadata["source"] = pdf.name
+        documents.extend(docs)
 
-    # 3. Split documents
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=800,
-        chunk_overlap=150,
+        chunk_size=500,  # Reduced from 700
+        chunk_overlap=50, # Reduced from 140
     )
     chunks = splitter.split_documents(documents)
 
-    # 4. Create embeddings
-    embeddings = SentenceTransformerEmbeddings(
-        model_name=EMBEDDING_MODEL_NAME
-    )
+    embeddings = SentenceTransformerEmbeddings(model_name=EMBEDDING_MODEL_NAME)
 
-    # 5. Build FAISS index
     vectorstore = FAISS.from_documents(chunks, embeddings)
 
-    # 6. Save FAISS to disk
     VECTORSTORE_DIR.mkdir(parents=True, exist_ok=True)
     vectorstore.save_local(str(VECTORSTORE_DIR))
 
