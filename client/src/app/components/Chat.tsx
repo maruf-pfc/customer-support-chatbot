@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import ChatMessage from "./ChatMessage";
+import ChatInput from "./ChatInput";
+import { motion } from "framer-motion";
 
 type Message = {
   role: "user" | "assistant";
@@ -9,28 +12,18 @@ type Message = {
 
 export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function sendMessage() {
-    if (!input.trim()) return;
-
-    const userMessage: Message = {
-      role: "user",
-      content: input,
-    };
-
+  async function sendMessage(text: string) {
+    const userMessage: Message = { role: "user", content: text };
     setMessages((prev) => [...prev, userMessage]);
-    setInput("");
     setLoading(true);
 
     try {
       const res = await fetch("http://localhost:8000/ask", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ question: userMessage.content }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: text }),
       });
 
       const data = await res.json();
@@ -41,13 +34,10 @@ export default function Chat() {
       };
 
       setMessages((prev) => [...prev, botMessage]);
-    } catch (error) {
+    } catch {
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          content: "❌ Error talking to server.",
-        },
+        { role: "assistant", content: "❌ Server error" },
       ]);
     } finally {
       setLoading(false);
@@ -56,47 +46,26 @@ export default function Chat() {
 
   return (
     <div className="flex flex-col h-screen max-w-3xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Customer Support Chatbot</h1>
+      <h1 className="text-xl font-semibold mb-4">AI Support Chatbot</h1>
 
-      {/* Chat messages */}
-      <div className="flex-1 overflow-y-auto space-y-3 mb-4">
-        {messages.map((msg, idx) => (
-          <div
-            key={idx}
-            className={`p-3 rounded-lg max-w-[80%] ${
-              msg.role === "user"
-                ? "bg-blue-500 text-white ml-auto"
-                : "bg-gray-200 text-black"
-            }`}
-          >
-            {msg.content}
-          </div>
+      {/* Messages */}
+      <div className="flex-1 space-y-3 overflow-y-auto mb-4">
+        {messages.map((msg, i) => (
+          <ChatMessage key={i} {...msg} />
         ))}
 
         {loading && (
-          <div className="bg-gray-200 text-black p-3 rounded-lg max-w-[80%]">
-            Thinking...
-          </div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="bg-muted rounded-xl px-4 py-3 w-fit text-sm"
+          >
+            Thinking…
+          </motion.div>
         )}
       </div>
 
-      {/* Input box */}
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-          placeholder="Ask a question..."
-          className="flex-1 border rounded px-3 py-2"
-        />
-        <button
-          onClick={sendMessage}
-          className="bg-blue-600 text-white px-4 py-2 rounded"
-        >
-          Send
-        </button>
-      </div>
+      <ChatInput onSend={sendMessage} loading={loading} />
     </div>
   );
 }

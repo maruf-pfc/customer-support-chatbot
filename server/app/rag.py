@@ -1,41 +1,44 @@
-from langchain.vectorstores import FAISS
-from langchain.embeddings import SentenceTransformerEmbeddings
-from langchain.llms import Ollama
-from langchain.prompts import PromptTemplate
-from langchain.chains import RetrievalQA
+from langchain_community.vectorstores import FAISS
+from langchain_community.embeddings import SentenceTransformerEmbeddings
+from langchain_community.llms import Ollama
+
+from langchain_core.prompts import PromptTemplate
+from langchain_core.runnables import RunnablePassthrough
 
 from app.config import VECTORSTORE_DIR, EMBEDDING_MODEL_NAME
 
 
 def load_rag_chain():
-    # 1. Load embeddings model
+    if not VECTORSTORE_DIR.exists():
+        raise RuntimeError(
+            "Vectorstore not found. Run ingest.py first."
+        )
+
+    # 1. Load embeddings
     embeddings = SentenceTransformerEmbeddings(
         model_name=EMBEDDING_MODEL_NAME
     )
 
-    # 2. Load FAISS vector store from disk
+    # 2. Load FAISS index
     vectorstore = FAISS.load_local(
-        str(VECTORSTORE_DIR),
-        embeddings,
-        allow_dangerous_deserialization=True
+        folder_path=str(VECTORSTORE_DIR),
+        embeddings=embeddings,
+        allow_dangerous_deserialization=True,
     )
 
-    # 3. Create retriever
-    retriever = vectorstore.as_retriever(
-        search_kwargs={"k": 4}
-    )
+    retriever = vectorstore.as_retriever(search_kwargs={"k": 4})
 
-    # 4. Load Ollama LLM
+    # 3. Load Ollama
     llm = Ollama(
-        model="qwen3:8b",
-        temperature=0
+        # model="qwen3:8b",
+        # model="qwen2.5:3b",
+        model="llama3.2:1b",
+        temperature=0,
     )
 
-    # 5. Prompt template
-    prompt = PromptTemplate(
-        input_variables=["context", "question"],
-        template="""
-You are a helpful assistant.
+    # 4. Prompt
+    prompt = PromptTemplate.from_template(
+        """You are a helpful assistant.
 Answer the question ONLY using the context below.
 If the answer is not in the context, say "I don't know".
 
@@ -45,17 +48,17 @@ Context:
 Question:
 {question}
 
-Answer:
-"""
+Answer:"""
     )
 
-    # 6. Create RAG chain
-    qa_chain = RetrievalQA.from_chain_type(
-        llm=llm,
-        retriever=retriever,
-        chain_type="stuff",
-        chain_type_kwargs={"prompt": prompt},
-        return_source_documents=True
+    # 5. Runnable RAG chain
+    rag_chain = (
+        {
+            "context": retriever,
+            "question": RunnablePassthrough(),
+        }
+        | prompt
+        | llm
     )
 
-    return qa_chain
+    return rag_chain
