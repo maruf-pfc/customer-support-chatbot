@@ -7,7 +7,7 @@ set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SERVER_DIR="$PROJECT_ROOT/server"
-FRONTEND_DIR="$PROJECT_ROOT/frontend"   # ← change if your frontend folder has different name
+client_DIR="$PROJECT_ROOT/client"   # ← change if your client folder has different name
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -55,13 +55,13 @@ start_backend() {
     exec uvicorn main:app --reload --port 8000
 }
 
-start_frontend() {
-    echo -e "${YELLOW}Starting Next.js frontend...${NC}"
-    cd "$FRONTEND_DIR" || { echo -e "${RED}Cannot cd to frontend directory${NC}"; exit 1; }
+start_client() {
+    echo -e "${YELLOW}Starting Next.js client...${NC}"
+    cd "$client_DIR" || { echo -e "${RED}Cannot cd to client directory${NC}"; exit 1; }
 
     # Install dependencies if needed
     if [ ! -d "node_modules" ]; then
-        echo "Installing frontend dependencies..."
+        echo "Installing client dependencies..."
         npm install
     fi
 
@@ -71,7 +71,7 @@ start_frontend() {
 # ── Main logic ─────────────────────────────────────────────────────
 echo "Choose what you want to start:"
 echo "  1) Backend only      (FastAPI + Ollama check)"
-echo "  2) Frontend only     (Next.js dev server)"
+echo "  2) client only     (Next.js dev server)"
 echo "  3) Both (recommended – opens two terminals)"
 echo ""
 read -rp "Enter number (1–3): " choice
@@ -81,7 +81,7 @@ case $choice in
         start_backend
         ;;
     2)
-        start_frontend
+        start_client
         ;;
     3)
         echo -e "${GREEN}Launching both services...${NC}"
@@ -89,15 +89,15 @@ case $choice in
 
         if command -v tmux >/dev/null 2>&1; then
             tmux new-session -d -s chatbot 'cd "'"$SERVER_DIR"'" && bash -c "source env/bin/activate 2>/dev/null || true; uvicorn main:app --reload --port 8000"'
-            tmux split-window -h -t chatbot 'cd "'"$FRONTEND_DIR"'" && npm run dev'
+            tmux split-window -h -t chatbot 'cd "'"$client_DIR"'" && npm run dev'
             tmux attach -t chatbot
         elif command -v gnome-terminal >/dev/null 2>&1; then
             gnome-terminal -- bash -c "cd '$SERVER_DIR' && source env/bin/activate 2>/dev/null || true && uvicorn main:app --reload --port 8000; exec bash" &
-            gnome-terminal -- bash -c "cd '$FRONTEND_DIR' && npm run dev; exec bash" &
+            gnome-terminal -- bash -c "cd '$client_DIR' && npm run dev; exec bash" &
         else
             echo -e "${YELLOW}Please open two terminals manually:${NC}"
             echo "Terminal 1: cd server && source env/bin/activate && uvicorn main:app --reload --port 8000"
-            echo "Terminal 2: cd frontend && npm run dev"
+            echo "Terminal 2: cd client && npm run dev"
         fi
         ;;
     *)
