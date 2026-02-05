@@ -1,90 +1,162 @@
 # AI Support Assistant 🚀
 
-A premium, document-aware customer support chatbot powered by RAG (Retrieval-Augmented Generation), FastAPI, and Next.js.
+A fully local, privacy-first customer support chatbot powered by Retrieval-Augmented Generation (RAG). Answers questions accurately using your own PDF documents — no cloud APIs, no data leaks.
 
-![AI Support Assistant](https://placehold.co/1200x600/png?text=AI+Support+Assistant+Preview)
+![Chatbot Preview](https://placehold.co/1200x630?text=AI+Support+Assistant+Chat+Interface&font=roboto)
 
 ## ✨ Features
 
-- **Document-Aware**: Answers questions based on your specific PDF documents (policies, manuals, course outlines).
-- **Modern UI/UX**: Glassmorphism design, smooth animations, and responsive layout.
-- **RAG Architecture**: Uses FAISS vector store and Ollama (Qwen2.5) for accurate retrieval and generation.
-- **Real-time Streaming**: Instant feedback with "Thinking" states and smooth message delivery.
+- **Document-Grounded Answers**: Uses your PDFs (policies, manuals, FAQs) as knowledge base
+- **Zero Cost & Private**: Runs 100% locally with Ollama
+- **Fast Retrieval**: FAISS vector database for semantic search
+- **Modern Chat UI**: Animated, responsive, dark-mode ready with shadcn/ui
+- **Real-time Feedback**: Smooth "Thinking..." animation during generation
+- **Cross-Platform**: Works on Linux, Windows, macOS
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: Next.js 15, TypeScript, TailwindCSS v4, Framer Motion, Lucide React
-- **Backend**: FastAPI, LangChain, FAISS, PyPDF
-- **AI Model**: Ollama (qwen2.5:3b), HuggingFace Embeddings (all-MiniLM-L6-v2)
+### Backend
 
-## 🚀 Getting Started
+- Python 3.10+
+- FastAPI
+- LangChain (modern Runnable API)
+- FAISS (vector database)
+- SentenceTransformers (`all-MiniLM-L6-v2`)
+- Ollama (`qwen2.5:3b` recommended)
 
-### Prerequisites
+### Frontend
 
-1. **Node.js** (v18+) and **pnpm**
-2. **Python** (v3.10+)
-3. **Ollama**: [Download and install Ollama](https://ollama.com/)
-   - Pull the model: `ollama pull qwen2.5:3b`
+- Next.js 14+ (App Router)
+- TypeScript
+- Tailwind CSS
+- shadcn/ui components
+- Framer Motion (animations)
+- Lucide React icons
 
-### Installation
+### AI Model
 
-1. **Clone the repository**
+- **Recommended**: `qwen2.5:3b` (fast & accurate on low-end hardware)
+- Alternatives: `phi3:mini`, `gemma2:2b`, `llama3.2:3b`
+
+## 📋 Prerequisites
+
+1. **Node.js** (v18 or higher) + **npm**
+2. **Python** (3.10–3.12 recommended)
+3. **Ollama** installed: [https://ollama.com/download](https://ollama.com/download)
+
+   After installing Ollama, pull the model:
+
    ```bash
-   git clone <repo-url>
-   cd customer-support-chatbot
+   ollama pull qwen2.5:3b
    ```
+````
 
-2. **Setup Server**
-   ```bash
-   cd server
-   python3 -m venv env
-   source env/bin/activate  # On Windows: env\Scripts\activate
-   pip install -r requirements.txt
-   ```
+## 🚀 Quick Start (One-Command Setup)
 
-3. **Setup Client**
-   ```bash
-   cd ../client
-   pnpm install
-   ```
+### Option 1: Use the launcher script (Recommended)
 
-### 🏃‍♂️ Running the App
-
-You can run both client and server with a single command from the root directory:
+From the project root, run:
 
 ```bash
-# From the root directory
-pnpm dev
+# Linux / macOS / Git Bash / WSL
+./run.sh
+
+# Windows PowerShell
+.\run.ps1
 ```
 
-- Client: [http://localhost:3000](http://localhost:3000)
-- Server API: [http://localhost:8000/docs](http://localhost:8000/docs)
+Follow the menu to start backend, frontend, or both.
 
-### 📚 Knowledge Base Ingestion
+### Option 2: Manual setup
 
-To add your own documents:
-1. Place PDF files in `server/data/docs/`
-2. Run the ingestion script:
+```bash
+# 1. Clone and enter project
+git clone <your-repo-url>
+cd customer-support-chatbot
+
+# 2. Backend setup
+cd server
+python -m venv env
+source env/bin/activate          # Windows: env\Scripts\activate
+pip install -r requirements.txt
+
+# 3. Frontend setup
+cd ../frontend
+npm install
+# or pnpm install / yarn install
+
+# 4. Ingest your documents (first time only)
+cd ../server
+python -m app.ingest             # Places PDFs in server/data/docs/
+
+# 5. Start services (two terminals)
+# Terminal 1 - Backend
+cd server
+source env/bin/activate
+uvicorn main:app --reload --port 8000
+
+# Terminal 2 - Frontend
+cd frontend
+npm run dev
+```
+
+Open browser: [http://localhost:3000](http://localhost:3000)
+
+API docs: [http://localhost:8000/docs](http://localhost:8000/docs)
+
+## 📚 Adding Your Knowledge Base
+
+1. Place your PDF files in `server/data/docs/`
+2. Run ingestion:
    ```bash
    cd server
-   # Ensure env is activated
-   python app/ingest.py
+   source env/bin/activate
+   python -m app.ingest
    ```
+3. Restart the backend server
+
+The chatbot will now answer based on your documents!
+
+## ⚙️ Performance Tips (Low-End Hardware)
+
+Your Ryzen 3 3200G can run this smoothly with these tweaks:
+
+- Use `qwen2.5:3b` or smaller (`phi3:mini`, `gemma2:2b`)
+- Limit Ollama threads:
+  ```bash
+  export OLLAMA_NUM_THREADS=3
+  ```
+- Reduce context size in `app/rag.py` if needed
+
+On Apple M4 devices: expect **2–5 second responses** (vs minutes on older PCs)
 
 ## 🐛 Troubleshooting
 
-**Server fails to start?**
-- Ensure virtual environment is activated.
-- Check if Ollama is running: `ollama list`
+| Issue                         | Solution                                              |
+| ----------------------------- | ----------------------------------------------------- |
+| Server fails to start         | Activate virtualenv, run `python -m app.ingest` first |
+| "Could not connect to server" | Ensure backend is running on port 8000                |
+| Slow responses                | Switch to smaller model, limit threads                |
+| Ollama errors                 | Run `ollama serve &` and check `ollama list`          |
+| Vectorstore missing           | Run ingestion script again                            |
+| Import errors                 | Reinstall requirements in clean env                   |
 
-**"RAG chain failed"?**
-- Did you run `ingest.py`? The vector store must be built first.
-- Ensure the `vectorstore` directory exists in `server/`.
+## 🤝 Contributing
 
-**Client connection error?**
-- Verify server is running on port 8000.
-- Check network console for CORS issues (CORS is allowed for "*" by default).
+Contributions welcome! Feel free to:
+
+- Improve UI/UX
+- Add markdown rendering
+- Support more document types
+- Optimize performance
 
 ## 📄 License
 
-MIT License
+MIT License — feel free to use commercially or modify.
+
+---
+
+Built with ❤️ by Md. Maruf Sarker
+Dhaka, Bangladesh · February 2026
+
+**Enjoy your customer support assistant** 🚀
