@@ -49,7 +49,6 @@ A fully local, privacy-first customer support chatbot powered by Retrieval-Augme
    ```bash
    ollama pull qwen2.5:3b
    ```
-````
 
 ## 🚀 Quick Start (One-Command Setup)
 
