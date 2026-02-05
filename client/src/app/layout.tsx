@@ -18,7 +18,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "AI Support Assistant | Premium Customer Care",
+  title: "Customer Support Chatbot",
   description: "Intelligent, document-aware customer support powered by RAG technology.",
 };
 

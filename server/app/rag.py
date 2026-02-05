@@ -55,9 +55,9 @@ def load_rag_chain():
     )
 
     llm = OllamaLLM(
-        model="qwen2.5:0.5b",
+        model="qwen2.5:0.5b",         # Significantly faster for low-end PCs
         temperature=0.1,
-        num_ctx=2048,  # Reduced context window for lower RAM usage
+        num_ctx=2048,                 # Kept small for RAM efficiency
         num_predict=256, # Reduced max tokens for speed
         timeout=60.0,
     )

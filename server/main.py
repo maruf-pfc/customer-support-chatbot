@@ -53,7 +53,7 @@ async def ask(req: AskRequest):
         print(f"Chain returned: {answer[:200]}...")  # truncate for log
         return {"answer": answer.strip()}
     except (TimeoutError, asyncio.TimeoutError):
-        print("❌ RAG execution timed out (Ollama unresponsive)")
+        print("RAG execution timed out (Ollama unresponsive)")
         raise HTTPException(504, "AI model timed out. Please try again later.")
     except Exception as e:
         import traceback

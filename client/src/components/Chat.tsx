@@ -58,7 +58,7 @@ export default function Chat() {
         ...prev,
         {
           role: "assistant",
-          content: "❌ Sorry — could not connect to server. Please ensure the server is running.",
+          content: "Sorry — could not connect to server. Please ensure the server is running.",
         },
       ]);
     } finally {
@@ -80,7 +80,7 @@ export default function Chat() {
             <Sparkles className="w-4 h-4 text-accent absolute -top-1 -right-1" />
           </div>
           <h1 className="text-3xl md:text-4xl font-bold gradient-text">
-            Customer Support Assistant
+            Customer Support Chatbot
           </h1>
         </div>
         <p className="text-sm text-muted-foreground">
